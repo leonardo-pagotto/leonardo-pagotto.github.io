@@ -1,0 +1,38 @@
+{{- /*
+  Same heading tree Hextra expects, with top-level sections included.
+
+  The theme TOC renders each entry's nested Headings and skips a top-level
+  title. Hugo returns the page sections themselves at the top, so wrap them
+  once. Otherwise "On this page" stays empty.
+*/ -}}
+
+{{- $headings := slice -}}
+{{- with .Fragments -}}
+  {{- with .Headings -}}
+    {{- $headings = . -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if not $headings -}}
+  {{- with .Content -}}
+    {{- $items := slice -}}
+    {{- range findRESubmatch `(?is)<h([1-6])\b[^>]*(?:id|data-hextra-search-id)=["']([^"']+)["'][^>]*>(.*?)</h[1-6]>` (. | htmlUnescape) -}}
+      {{- $level := int (index . 1) -}}
+      {{- $id := index . 2 -}}
+      {{- $title := index . 3 | plainify | htmlUnescape | strings.TrimSpace -}}
+      {{- if and $id $title -}}
+        {{- $items = $items | append (dict "ID" $id "Level" $level "Title" $title "Headings" slice) -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $headings = $items -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if $headings -}}
+  {{- $first := index $headings 0 -}}
+  {{- if $first.Title -}}
+    {{- $headings = slice (dict "ID" "" "Level" 0 "Title" "" "Headings" $headings) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- return (dict "headings" $headings) -}}

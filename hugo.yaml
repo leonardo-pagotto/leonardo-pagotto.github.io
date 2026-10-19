@@ -1,0 +1,54 @@
+baseURL: https://example.org/
+locale: en-us
+title: Leonardo Pagotto
+
+markup:
+  tableOfContents:
+    startLevel: 1
+    endLevel: 4
+
+module:
+  imports:
+    - path: github.com/imfing/hextra
+
+menu:
+  main:
+    - name: Blog
+      pageRef: /blog
+      weight: 1
+    - name: About
+      pageRef: /about
+      weight: 2
+    - name: Search
+      weight: 4
+      params:
+        type: search
+    - name: GitHub
+      weight: 5
+      url: "https://github.com/leonardo-pagotto/"
+      params:
+        icon: github
+    - name: Theme
+      weight: 6
+      params:
+        type: theme-toggle
+
+params:
+  footer:
+    displayPoweredBy: false
+  theme:
+    displayToggle: false
+  navbar:
+    displayTitle: true
+    displayLogo: false
+  page:
+    displayPagination: false # for docs pages
+  blog:
+    article:
+      displayPagination: true # for blog articles
+    list:
+      displayTags: true
+      sortBy: date
+      sortOrder: desc
+    toc:
+      displayTags: true

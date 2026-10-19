@@ -1,0 +1,8 @@
+{{ define "main" }}
+  {{- $blog := site.GetPage "/blog" -}}
+  {{- partial "blog-carousel.html" (dict
+    "page" .
+    "listPage" (or $blog .)
+    "heading" (or (and $blog $blog.Title) "Blog")
+  ) -}}
+{{ end }}

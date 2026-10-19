@@ -1,0 +1,40 @@
+{{ define "main" }}
+  {{- $posts := where site.RegularPages "Section" "blog" -}}
+  {{- $posts = $posts.ByDate.Reverse -}}
+  {{- $posts = first 8 $posts -}}
+  {{- $count := len $posts -}}
+
+  <div class="hx:mx-auto hx:flex hextra-max-page-width">
+    <article class="hx:w-full hx:break-words hx:flex hx:min-h-[calc(100vh-var(--hextra-navbar-height))] hx:min-w-0 hx:justify-center hx:pb-8">
+      <main id="content" class="about hx:w-full hx:min-w-0 hx:px-6 hx:pt-8 hx:md:px-12">
+        <section class="about-stage">
+          <div class="about-letter">
+            <p class="about-kicker">About</p>
+            <h1 class="about-name">Leonardo<br><em>Pagotto</em></h1>
+          </div>
+
+          {{- if gt $count 0 -}}
+            <ul class="about-orbit" style="--n: {{ $count }}" aria-label="Notes from the blog">
+              {{- range $i, $post := $posts -}}
+                <li class="about-orbit__item" style="--i: {{ $i }}">
+                  <a href="{{ $post.RelPermalink }}">
+                    <time datetime="{{ $post.Date.Format "2006-01-02" }}">{{ $post.Date.Format "Jan 2006" }}</time>
+                    <span>{{ $post.Title }}</span>
+                  </a>
+                </li>
+              {{- end -}}
+            </ul>
+          {{- end -}}
+        </section>
+        <div class="about-caption">
+          <p class="about-lead">Software engineer. I keep this notebook for the ideas that never fit in a commit message.</p>
+          <p class="about-aside">Not a résumé. The notes circling this page are the actual record.</p>
+          <a class="about-link" href="https://github.com/leonardo-pagotto/" target="_blank" rel="noreferrer">github.com/leonardo-pagotto</a>
+        </div>
+        <section class="about-lore content">
+          {{ .Content }}
+        </section>
+      </main>
+    </article>
+  </div>
+{{ end }}

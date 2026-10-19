@@ -1,0 +1,7 @@
+# Generated site
+/public/
+
+# Hugo build cache and lock
+/resources/_gen/
+.hugo_build.lock
+hugo_stats.json

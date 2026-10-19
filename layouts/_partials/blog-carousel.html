@@ -1,0 +1,143 @@
+{{- $page := .page -}}
+{{- $listPage := .listPage -}}
+{{- $pages := where site.RegularPages "Section" "blog" -}}
+{{- $sortBy := site.Params.blog.list.sortBy | default "date" -}}
+{{- $sortOrder := site.Params.blog.list.sortOrder | default "desc" -}}
+{{- if eq $sortBy "title" -}}
+  {{- $pages = $pages.ByTitle -}}
+{{- else if eq $sortBy "weight" -}}
+  {{- $pages = $pages.ByWeight -}}
+{{- else -}}
+  {{- $pages = $pages.ByDate -}}
+{{- end -}}
+{{- if ne $sortOrder "asc" -}}
+  {{- $pages = $pages.Reverse -}}
+{{- end -}}
+{{- $highlighted := where $pages "Params.highlight" true -}}
+{{- $others := $pages | complement $highlighted -}}
+
+<div class="hx:mx-auto hx:flex hextra-max-page-width">
+  {{ partial "sidebar.html" (dict "context" $page "disableSidebar" true "displayPlaceholder" false) }}
+  <article class="hx:w-full hx:break-words hx:flex hx:min-h-[calc(100vh-var(--hextra-navbar-height))] hx:min-w-0 hx:justify-center hx:pb-8 hx:pr-[calc(env(safe-area-inset-right)-1.5rem)]">
+    <main id="content" class="hx:w-full hx:min-w-0 hx:px-6 hx:pt-4 hx:md:px-12">
+      {{ partial "custom/page-begin.html" $page }}
+      {{ partial "breadcrumb.html" (dict "page" $page "enable" false) }}
+      <div class="content">
+        {{ partial "custom/content-begin.html" $listPage }}
+        {{ $listPage.Content }}
+        {{ partial "custom/content-end.html" $listPage }}
+      </div>
+
+      {{- if and (eq (len $highlighted) 0) (eq (len $others) 0) -}}
+        <p class="post-carousel__empty">No posts yet.</p>
+      {{- end -}}
+
+      {{- if gt (len $highlighted) 0 -}}
+        <section class="post-carousel" data-post-carousel data-per-view="3" aria-roledescription="carousel" aria-label="Highlighted posts" tabindex="0">
+          <h2 class="post-carousel__heading">Highlighted</h2>
+          <div class="post-carousel__viewport">
+            <ul class="post-carousel__track" data-carousel-track>
+              {{- range $post := $highlighted -}}
+                <li class="post-carousel__slide" data-carousel-slide>
+                  <article class="post-carousel__card">
+                    <div class="post-carousel__body">
+                      {{ template "post-stamp" $post }}
+                      <h2 class="post-carousel__title">
+                        <a href="{{ $post.RelPermalink }}">{{ $post.Title }}</a>
+                      </h2>
+                      {{- with ($post.Summary | plainify | htmlUnescape | strings.TrimSpace | truncate 220) -}}
+                        <p class="post-carousel__preview">{{ . }}</p>
+                      {{- end -}}
+                    </div>
+                    {{- if site.Params.blog.list.displayTags -}}
+                      <div class="post-carousel__footer">
+                        {{ template "post-tags" $post }}
+                      </div>
+                    {{- end -}}
+                  </article>
+                </li>
+              {{- end -}}
+              <li class="post-carousel__spacer" data-carousel-spacer aria-hidden="true"></li>
+            </ul>
+          </div>
+          {{- if gt (len $highlighted) 1 -}}
+            <div class="post-carousel__controls">
+              <button type="button" class="post-carousel__nav" data-carousel-prev aria-label="Previous posts">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="post-carousel__dots" data-carousel-dots role="group" aria-label="Choose posts"></div>
+              <button type="button" class="post-carousel__nav" data-carousel-next aria-label="Next posts">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <p class="post-carousel__status hx:sr-only" data-carousel-status aria-live="polite"></p>
+          {{- end -}}
+        </section>
+        {{- with resources.Get "js/post-carousel.js" -}}
+          <script src="{{ .RelPermalink }}" defer></script>
+        {{- end -}}
+      {{- end -}}
+
+      {{- if gt (len $others) 0 -}}
+        <section class="post-archive" aria-labelledby="recent-posts">
+          <h2 id="recent-posts" class="post-archive__heading">Latest Posts</h2>
+          {{- range $group := $others.GroupByDate "January 2006" -}}
+            {{- $count := len $group.Pages -}}
+            <div class="post-archive__month-block">
+              <div class="post-archive__month-row">
+                <h3 class="post-archive__month">{{ $group.Key }}</h3>
+                <span class="post-archive__count">{{ $count }} {{ cond (eq $count 1) "post" "posts" }}</span>
+              </div>
+              <div class="post-archive__group">
+              <ul class="post-archive__list">
+                {{- range $post := $group.Pages.ByDate.Reverse -}}
+                  <li class="post-archive__item">
+                    <div class="post-archive__main">
+                      {{ template "post-stamp" $post }}
+                      <h3 class="post-archive__title"><a href="{{ $post.RelPermalink }}">{{ $post.Title }}</a></h3>
+                      {{- with ($post.Summary | plainify | htmlUnescape | strings.TrimSpace | truncate 220) -}}
+                        <p class="post-archive__preview">{{ . }}</p>
+                      {{- end -}}
+                    </div>
+                    {{- if site.Params.blog.list.displayTags -}}
+                      <div class="post-archive__aside">
+                        {{ template "post-tags" $post }}
+                      </div>
+                    {{- end -}}
+                  </li>
+                {{- end -}}
+              </ul>
+              </div>
+            </div>
+          {{- end -}}
+        </section>
+      {{- end -}}
+
+      {{ partial "custom/page-end.html" $page }}
+    </main>
+  </article>
+</div>
+
+{{- define "post-tags" -}}
+  {{- $post := . -}}
+  {{- if $post.Params.tags -}}
+    <div class="post-tags">
+      {{- range $tag := $post.Params.tags -}}
+        {{- with $post.Site.GetPage (printf "/tags/%s" $tag) -}}
+          <a class="post-tag" href="{{ .RelPermalink }}">{{ $tag }}</a>
+        {{- end -}}
+      {{- end -}}
+    </div>
+  {{- end -}}
+{{- end -}}
+
+{{- define "post-stamp" -}}
+  {{- $post := . -}}
+  {{- $when := $post.Date -}}
+  {{- $updated := false -}}
+  {{- if and (not $post.Lastmod.IsZero) ($post.Lastmod.After $post.Date) -}}
+    {{- $when = $post.Lastmod -}}
+    {{- $updated = true -}}
+  {{- end -}}
+  <time class="post-stamp" datetime="{{ $when.Format "2006-01-02T15:04:05Z07:00" }}">{{ if $updated }}Updated {{ end }}{{ $when.Format "Jan 2, 2006, 3:04 PM" }}</time>
+{{- end -}}

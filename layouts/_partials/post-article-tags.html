@@ -1,0 +1,11 @@
+{{- if and .Params.tags (eq .Section "blog") (not .IsNode) -}}
+  <div class="post-tags post-article-tags">
+    {{- range $tag := .Params.tags -}}
+      {{- with site.GetPage (printf "/tags/%s" (urlize $tag)) -}}
+        <a class="post-tag" href="{{ .RelPermalink }}">{{ $tag }}</a>
+      {{- else -}}
+        <span class="post-tag">{{ $tag }}</span>
+      {{- end -}}
+    {{- end -}}
+  </div>
+{{- end -}}
