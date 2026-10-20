@@ -1,6 +1,6 @@
 ---
 date: '2026-10-15T12:00:00-03:00'
-draft: true
+draft: false
 title: 'GPU Passthrough: Challenges and Solutions'
 highlight: false
 tags:
